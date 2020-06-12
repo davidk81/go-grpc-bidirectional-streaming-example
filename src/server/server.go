@@ -15,7 +15,7 @@ type server struct{}
 func (s server) Max(srv pb.Math_MaxServer) error {
 
 	log.Println("start new server")
-	var max int32
+	var size int
 	ctx := srv.Context()
 
 	for {
@@ -40,19 +40,13 @@ func (s server) Max(srv pb.Math_MaxServer) error {
 			continue
 		}
 
-		// continue if number reveived from stream
-		// less than max
-		if req.Num <= max {
-			continue
-		}
-
 		// update max and send it to stream
-		max = req.Num
-		resp := pb.Response{Result: max}
+		size = len(req.Data)
+		resp := pb.Response{Size: int32(size)}
 		if err := srv.Send(&resp); err != nil {
 			log.Printf("send error %v", err)
 		}
-		log.Printf("send new max=%d", max)
+		log.Printf("send size=%d", size)
 	}
 }
 

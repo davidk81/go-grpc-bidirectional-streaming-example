@@ -7,9 +7,9 @@ service Math {
 }
 
 message Request {
-  int32 num = 1;
+  bytes data = 1;
 }
 
 message Response {
-  int32 result = 1;
+  int32 size = 1;
 }

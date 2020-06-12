@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -29,22 +30,23 @@ func main() {
 		log.Fatalf("openn stream error %v", err)
 	}
 
-	var max int32
+	var size int32
 	ctx := stream.Context()
 	done := make(chan bool)
+	timerStart := time.Now()
 
 	// first goroutine sends random increasing numbers to stream
 	// and closes int after 10 iterations
 	go func() {
-		for i := 1; i <= 10; i++ {
+		for i := 1; i <= 1000; i++ {
 			// generate random nummber and send it to stream
-			rnd := int32(rand.Intn(i))
-			req := pb.Request{Num: rnd}
+			buffer := make([]byte, 1000000)
+			rand.Read(buffer)
+			req := pb.Request{Data: buffer}
 			if err := stream.Send(&req); err != nil {
 				log.Fatalf("can not send %v", err)
 			}
-			log.Printf("%d sent", req.Num)
-			time.Sleep(time.Millisecond * 200)
+			time.Sleep(50 * time.Millisecond)
 		}
 		if err := stream.CloseSend(); err != nil {
 			log.Println(err)
@@ -56,6 +58,7 @@ func main() {
 	//
 	// if stream is finished it closes done channel
 	go func() {
+		totalReceived := float64(0)
 		for {
 			resp, err := stream.Recv()
 			if err == io.EOF {
@@ -65,8 +68,12 @@ func main() {
 			if err != nil {
 				log.Fatalf("can not receive %v", err)
 			}
-			max = resp.Result
-			log.Printf("new max %d received", max)
+			size = resp.Size
+			totalReceived += float64(size)
+			elapsed := time.Since(timerStart).Seconds()
+			if elapsed > 0 {
+				log.Printf("rate: %vbps", humanReadableCountSI(int64(totalReceived*8/elapsed)))
+			}
 		}
 	}()
 
@@ -81,5 +88,22 @@ func main() {
 	}()
 
 	<-done
-	log.Printf("finished with max=%d", max)
+	log.Printf("finished")
+}
+
+// converts number (typically bytes or bits) to human readable SI string
+// eg: bytes=1200 -> 1.2k
+// 	   bytes=1200000 0> 1.2M
+// ported from https://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
+func humanReadableCountSI(bytes int64) string {
+	if -1000 < bytes && bytes < 1000 {
+		return fmt.Sprintf("%d ", bytes)
+	}
+	ci := "kMGTPE"
+	idx := 0
+	for bytes <= -999950 || bytes >= 999950 {
+		bytes /= 1000
+		idx++
+	}
+	return fmt.Sprintf("%.1f %c", float64(bytes)/1000.0, ci[idx])
 }
