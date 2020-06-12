@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"os"
 
 	pb "github.com/pahanini/go-grpc-bidirectional-streaming-example/src/proto"
 
@@ -17,8 +18,14 @@ import (
 func main() {
 	rand.Seed(time.Now().Unix())
 
+	remoteAddr := ":50005"
+	if len(os.Args) > 1 {
+		remoteAddr = os.Args[1]
+	}
+
 	// dail server
-	conn, err := grpc.Dial(":50005", grpc.WithInsecure())
+	log.Printf("dialing %v\n", remoteAddr)
+	conn, err := grpc.Dial(remoteAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("can not connect with server %v", err)
 	}

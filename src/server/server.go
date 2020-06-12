@@ -52,7 +52,7 @@ func (s server) Max(srv pb.Math_MaxServer) error {
 
 func main() {
 	// create listiner
-	lis, err := net.Listen("tcp", ":50005")
+	lis, err := net.Listen("tcp", "0.0.0.0:50005")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
