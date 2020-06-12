@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 
 	pb "github.com/pahanini/go-grpc-bidirectional-streaming-example/src/proto"
 
@@ -51,8 +52,14 @@ func (s server) Max(srv pb.Math_MaxServer) error {
 }
 
 func main() {
+	listenAddr := ":50005"
+	if len(os.Args) > 1 {
+		listenAddr = os.Args[1]
+	}
+
 	// create listiner
-	lis, err := net.Listen("tcp", "0.0.0.0:50005")
+	log.Printf("listening on %v\n", listenAddr)
+	lis, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
