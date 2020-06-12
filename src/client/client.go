@@ -25,13 +25,7 @@ func main() {
 
 	// dail server
 	log.Printf("dialing %v\n", remoteAddr)
-	conn, err := grpc.Dial(remoteAddr,
-		grpc.WithInsecure(),
-		grpc.WithInitialWindowSize(10000000),
-		grpc.WithReadBufferSize(10000000),
-		grpc.WithMaxMsgSize(10000000),
-		grpc.WithWriteBufferSize(10000000),
-		grpc.WithInitialConnWindowSize(10000000))
+	conn, err := grpc.Dial(remoteAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("can not connect with server %v", err)
 	}

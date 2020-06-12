@@ -65,12 +65,7 @@ func main() {
 	}
 
 	// create grpc server
-	s := grpc.NewServer(
-		grpc.InitialWindowSize(10000000),
-		grpc.ReadBufferSize(10000000),
-		grpc.MaxMsgSize(10000000),
-		grpc.WriteBufferSize(10000000),
-		grpc.InitialConnWindowSize(10000000))
+	s := grpc.NewServer()
 	pb.RegisterMathServer(s, server{})
 
 	// and start...
