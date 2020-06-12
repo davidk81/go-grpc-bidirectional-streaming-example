@@ -46,7 +46,6 @@ func main() {
 			if err := stream.Send(&req); err != nil {
 				log.Fatalf("can not send %v", err)
 			}
-			time.Sleep(50 * time.Millisecond)
 		}
 		if err := stream.CloseSend(); err != nil {
 			log.Println(err)
